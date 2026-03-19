@@ -34,9 +34,52 @@ jobs:
       - name: Find zip and release
         shell: pwsh
         run: |
+          $zip = Get-ChildItem -Path SolutionBuild -Recurse -Filter "*.zip" | Select-Object
+cat > .github/workflows/build-release.yml << 'WORKFLOWEOF'
+name: Build and Release Managed Solution
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+      - name: Install Power Platform CLI
+        shell: pwsh
+        run: |
+          dotnet tool install --global Microsoft.PowerApps.CLI.Tool
+          echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - run: npm install
+      - run: npm run build
+      - name: Init solution
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path SolutionBuild
+          Set-Location SolutionBuild
+          pac solution init --publisher-name Bofor --publisher-prefix bfr
+          pac solution add-reference --path ../
+      - name: Build managed solution
+        shell: pwsh
+        run: |
+          Set-Location SolutionBuild
+          $proj = Get-ChildItem -Filter "*.cdsproj" | Select-Object -First 1
+          dotnet build $proj.FullName --configuration Release /p:SolutionPackageType=Managed
+      - name: Find zip and release
+        shell: pwsh
+        id: find_zip
+        run: |
           $zip = Get-ChildItem -Path SolutionBuild -Recurse -Filter "*.zip" | Select-Object -First 1
           echo "ZIP_PATH=$($zip.FullName)" >> $env:GITHUB_OUTPUT
-        id: find_zip
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
