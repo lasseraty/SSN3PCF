@@ -1,7 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <data name="FinnishSSNControl_Display_Key" xml:space="preserve"><value>Finnish SSN Field</value></data>
-  <data name="FinnishSSNControl_Desc_Key" xml:space="preserve"><value>PCF control for Finnish personal identity codes (henkilötunnus).</value></data>
-  <data name="SSN_Value_Display_Key" xml:space="preserve"><value>SSN Value</value></data>
-  <data name="SSN_Value_Desc_Key" xml:space="preserve"><value>Bound nvarchar column that stores the Finnish personal identity code.</value></data>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="FinnishSSNControl_Display_Key" xml:space="preserve">
+    <value>Finnish SSN Field</value>
+  </data>
+  <data name="FinnishSSNControl_Desc_Key" xml:space="preserve">
+    <value>PCF control for Finnish personal identity codes (henkilotunnus).</value>
+  </data>
+  <data name="SSN_Value_Display_Key" xml:space="preserve">
+    <value>SSN Value</value>
+  </data>
+  <data name="SSN_Value_Desc_Key" xml:space="preserve">
+    <value>Bound nvarchar column that stores the Finnish personal identity code.</value>
+  </data>
 </root>
