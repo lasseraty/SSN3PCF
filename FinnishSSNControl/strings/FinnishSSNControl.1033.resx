@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="FinnishSSNControl_Display_Key" xml:space="preserve"><value>Finnish SSN Field</value></data>
+  <data name="FinnishSSNControl_Desc_Key" xml:space="preserve"><value>PCF control for Finnish personal identity codes (henkilötunnus).</value></data>
+  <data name="SSN_Value_Display_Key" xml:space="preserve"><value>SSN Value</value></data>
+  <data name="SSN_Value_Desc_Key" xml:space="preserve"><value>Bound nvarchar column that stores the Finnish personal identity code.</value></data>
+</root>

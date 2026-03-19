@@ -1,0 +1,9 @@
+node_modules/
+out/
+obj/
+.vs/
+generated/
+*.suo
+*.user
+.DS_Store
+SolutionBuild/

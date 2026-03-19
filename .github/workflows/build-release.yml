@@ -1,0 +1,49 @@
+name: Build and Release Managed Solution
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Install Power Platform CLI
+        run: |
+          dotnet tool install --global Microsoft.PowerApps.CLI.Tool
+          echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -
+cat > FinnishSSNControl/ControlManifest.Input.xml << 'EOF'
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="BoforPCF" constructor="FinnishSSNControl" version="1.0.0"
+    display-name-key="FinnishSSNControl_Display_Key"
+    description-key="FinnishSSNControl_Desc_Key"
+    control-type="standard">
+    <property name="ssnValue"
+      display-name-key="SSN_Value_Display_Key"
+      description-key="SSN_Value_Desc_Key"
+      of-type="SingleLine.Text"
+      usage="bound"
+      required="true" />
+    <resources>
+      <code path="index.ts" order="1"/>
+      <css path="css/FinnishSSNControl.css" order="1"/>
+      <resx path="strings/FinnishSSNControl.1033.resx" version="1.0.0" />
+    </resources>
+  </control>
+</manifest>
