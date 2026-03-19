@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
       - name: Install .NET Framework 4.6.2 targeting pack
         shell: pwsh
         run: choco install netfx-4.6.2-devpack --yes --no-progress --ignore-checksums
@@ -28,11 +30,6 @@ jobs:
         run: npm install
       - name: Build PCF control
         run: npm run build
-      - name: Verify PCF build output
-        shell: pwsh
-        run: |
-          Write-Host "PCF build output:"
-          Get-ChildItem -Path out -Recurse | Select-Object FullName
       - name: Init solution
         shell: pwsh
         run: |
@@ -45,22 +42,21 @@ jobs:
         run: |
           Set-Location SolutionBuild
           $proj = Get-ChildItem -Filter "*.cdsproj" | Select-Object -First 1
-          Write-Host "Building project: $($proj.FullName)"
+          Write-Host "Building: $($proj.FullName)"
           msbuild $proj.FullName /t:build /restore /p:configuration=Release /p:SolutionPackageType=Managed
       - name: Find and rename zip
         shell: pwsh
         id: find_zip
         run: |
           $zip = Get-ChildItem -Path SolutionBuild -Recurse -Filter "*.zip" | Select-Object -First 1
-          Write-Host "Found zip: $($zip.FullName) — size: $($zip.Length) bytes"
-          $dest = "BoforSSN_managed.zip"
-          Copy-Item $zip.FullName $dest
-          echo "ZIP_PATH=$dest" >> $env:GITHUB_OUTPUT
+          Write-Host "Found: $($zip.FullName) — $($zip.Length) bytes"
+          Copy-Item $zip.FullName "BoforSSN_managed.zip"
+          echo "ZIP_PATH=BoforSSN_managed.zip" >> $env:GITHUB_OUTPUT
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Bofor SSN PCF v1.0.${{ github.run_number }}
-          files: ${{ steps.find_zip.outputs.ZIP_PATH }}
+          files: BoforSSN_managed.zip
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
