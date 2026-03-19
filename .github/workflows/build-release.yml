@@ -24,8 +24,15 @@ jobs:
         run: |
           dotnet tool install --global Microsoft.PowerApps.CLI.Tool
           echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      - run: npm install
-      - run: npm run build
+      - name: Install npm dependencies
+        run: npm install
+      - name: Build PCF control
+        run: npm run build
+      - name: Verify PCF build output
+        shell: pwsh
+        run: |
+          Write-Host "PCF build output:"
+          Get-ChildItem -Path out -Recurse | Select-Object FullName
       - name: Init solution
         shell: pwsh
         run: |
@@ -38,17 +45,21 @@ jobs:
         run: |
           Set-Location SolutionBuild
           $proj = Get-ChildItem -Filter "*.cdsproj" | Select-Object -First 1
-          dotnet build $proj.FullName --configuration Release /p:SolutionPackageType=Managed
-      - name: Find zip and release
+          Write-Host "Building project: $($proj.FullName)"
+          msbuild $proj.FullName /t:build /restore /p:configuration=Release /p:SolutionPackageType=Managed
+      - name: Find and rename zip
         shell: pwsh
         id: find_zip
         run: |
           $zip = Get-ChildItem -Path SolutionBuild -Recurse -Filter "*.zip" | Select-Object -First 1
-          echo "ZIP_PATH=$($zip.FullName)" >> $env:GITHUB_OUTPUT
+          Write-Host "Found zip: $($zip.FullName) — size: $($zip.Length) bytes"
+          $dest = "BoforSSN_managed.zip"
+          Copy-Item $zip.FullName $dest
+          echo "ZIP_PATH=$dest" >> $env:GITHUB_OUTPUT
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: Finnish SSN PCF v1.0.${{ github.run_number }}
+          name: Bofor SSN PCF v1.0.${{ github.run_number }}
           files: ${{ steps.find_zip.outputs.ZIP_PATH }}
           fail_on_unmatched_files: false
         env:
