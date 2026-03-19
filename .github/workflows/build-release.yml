@@ -23,44 +23,6 @@ jobs:
           echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - run: npm install
       - run: npm run build
-      - name: Init and build solution
-        shell: bash
-        run: |
-          mkdir -p SolutionBuild
-          cd SolutionBuild
-          pac solution init --publisher-name Bofor --publisher-prefix bfr
-          pac solution add-reference --path ../
-          dotnet build --configuration Release /p:SolutionPackageType=Managed
-      - name: Find zip and release
-        shell: pwsh
-        run: |
-          $zip = Get-ChildItem -Path SolutionBuild -Recurse -Filter "*.zip" | Select-Object
-cat > .github/workflows/build-release.yml << 'WORKFLOWEOF'
-name: Build and Release Managed Solution
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '6.0.x'
-      - name: Install Power Platform CLI
-        shell: pwsh
-        run: |
-          dotnet tool install --global Microsoft.PowerApps.CLI.Tool
-          echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      - run: npm install
-      - run: npm run build
       - name: Init solution
         shell: pwsh
         run: |
@@ -87,4 +49,4 @@ jobs:
           files: ${{ steps.find_zip.outputs.ZIP_PATH }}
           fail_on_unmatched_files: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
