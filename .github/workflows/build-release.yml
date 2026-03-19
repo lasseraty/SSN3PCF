@@ -16,10 +16,12 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
-      - name: Install .NET Framework 4.x targeting pack
+      - name: Install .NET Framework 4.6.2 targeting pack
         shell: pwsh
         run: |
-          choco install netfx-4.6.2-devpack --yes --no-progress
+          $url = "https://download.visualstudio.microsoft.com/download/pr/992fc46e-0a2f-4a18-b327-7e658bbbc7c4/c13d4a8db5cac6ccd2cb5562c63dc6c6/ndp462-devpack-kb3151934-enu.exe"
+          Invoke-WebRequest -Uri $url -OutFile ndp462-devpack.exe
+          Start-Process -Wait -FilePath ndp462-devpack.exe -ArgumentList "/q /norestart"
       - name: Install Power Platform CLI
         shell: pwsh
         run: |
