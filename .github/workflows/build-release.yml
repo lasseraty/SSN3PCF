@@ -8,42 +8,40 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
-
       - name: Install Power Platform CLI
+        shell: pwsh
         run: |
           dotnet tool install --global Microsoft.PowerApps.CLI.Tool
-          echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -
-cat > FinnishSSNControl/ControlManifest.Input.xml << 'EOF'
-<?xml version="1.0" encoding="utf-8" ?>
-<manifest>
-  <control namespace="BoforPCF" constructor="FinnishSSNControl" version="1.0.0"
-    display-name-key="FinnishSSNControl_Display_Key"
-    description-key="FinnishSSNControl_Desc_Key"
-    control-type="standard">
-    <property name="ssnValue"
-      display-name-key="SSN_Value_Display_Key"
-      description-key="SSN_Value_Desc_Key"
-      of-type="SingleLine.Text"
-      usage="bound"
-      required="true" />
-    <resources>
-      <code path="index.ts" order="1"/>
-      <css path="css/FinnishSSNControl.css" order="1"/>
-      <resx path="strings/FinnishSSNControl.1033.resx" version="1.0.0" />
-    </resources>
-  </control>
-</manifest>
+          echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - run: npm install
+      - run: npm run build
+      - name: Init and build solution
+        shell: bash
+        run: |
+          mkdir -p SolutionBuild
+          cd SolutionBuild
+          pac solution init --publisher-name Bofor --publisher-prefix bfr
+          pac solution add-reference --path ../
+          dotnet build --configuration Release /p:SolutionPackageType=Managed
+      - name: Find zip and release
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem -Path SolutionBuild -Recurse -Filter "*.zip" | Select-Object -First 1
+          echo "ZIP_PATH=$($zip.FullName)" >> $env:GITHUB_OUTPUT
+        id: find_zip
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Finnish SSN PCF v1.0.${{ github.run_number }}
+          files: ${{ steps.find_zip.outputs.ZIP_PATH }}
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
