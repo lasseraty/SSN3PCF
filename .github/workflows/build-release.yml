@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '16'
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
@@ -42,7 +42,6 @@ jobs:
         run: |
           Set-Location SolutionBuild
           $proj = Get-ChildItem -Filter "*.cdsproj" | Select-Object -First 1
-          Write-Host "Building: $($proj.FullName)"
           msbuild $proj.FullName /t:build /restore /p:configuration=Release /p:SolutionPackageType=Managed
       - name: Find and rename zip
         shell: pwsh

@@ -9,10 +9,14 @@
     "start": "pcf-scripts start"
   },
   "dependencies": {
-    "@types/powerapps-component-framework": "1.3.4"
+    "@types/powerapps-component-framework": "1.3.4",
+    "lodash": "^4.17.23"
   },
   "devDependencies": {
-    "pcf-scripts": "~1",
-    "pcf-start": "~1"
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
+    "eslint": "^9.39.4",
+    "pcf-scripts": "^1.3.6",
+    "pcf-start": "^1.3.6"
   }
 }
