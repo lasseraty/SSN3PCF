@@ -11,9 +11,9 @@
       usage="bound"
       required="true" />
     <resources>
-      <code path="index.ts" order="1"/>
-      <css path="css/FinnishSSNControl.css" order="1"/>
-      <resx path="strings/FinnishSSNControl.1033.resx" version="1.0.0" />
+      <code path="FinnishSSNControl/index.ts" order="1"/>
+      <css path="FinnishSSNControl/css/FinnishSSNControl.css" order="1"/>
+      <resx path="FinnishSSNControl/strings/FinnishSSNControl.1033.resx" version="1.0.0" />
     </resources>
   </control>
 </manifest>
