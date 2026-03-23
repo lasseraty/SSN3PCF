@@ -1,4 +1,4 @@
-import { IInputs, IOutputs } from "./generated/ManifestTypes";
+import { IInputs, IOutputs } from "../generated/ManifestTypes";
 
 export class FinnishSSNControl implements ComponentFramework.StandardControl<IInputs, IOutputs> {
 
