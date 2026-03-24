@@ -1,131 +1,75 @@
-.ssn-card {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 6px 0 0 0;
-  font-family: "Segoe UI", sans-serif;
-}
-
-.ssn-card-header {
+.ssn-container {
   display: flex;
   align-items: center;
-  margin-bottom: 6px;
+  height: 44px;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  padding: 0 12px;
+  background: #fff;
+  transition: all 0.15s ease;
 }
 
-.ssn-label {
-  display: inline-flex;
+.ssn-container:focus-within {
+  border-color: #0a66c2;
+  box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
+}
+
+.ssn-left {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #323130;
-  letter-spacing: 0.02em;
+  gap: 8px;
+  margin-right: 10px;
 }
 
 .ssn-flag {
-  font-size: 14px;
-  line-height: 1;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
 }
 
-.ssn-field-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 42px;
-  background: #ffffff;
-  border: 1px solid #d2d0ce;
-  border-radius: 10px;
-  overflow: hidden;
-  box-sizing: border-box;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.ssn-field-row:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
-}
-
-.ssn-field-row.ssn-error {
-  border-color: #dc2626;
-}
-
-.ssn-field-row.ssn-success {
-  border-color: #16a34a;
-}
-
-.ssn-input,
-.ssn-locked-value {
-  flex: 1;
-  min-width: 0;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  font-size: 14px;
-  color: #201f1e;
-  background: #fff;
-  box-sizing: border-box;
-  font-family: "Consolas", "Courier New", monospace;
-  letter-spacing: 0.06em;
+.ssn-label {
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
 }
 
 .ssn-input {
+  flex: 1;
   border: none;
   outline: none;
+  font-size: 14px;
+  font-family: "Segoe UI", monospace;
+  background: transparent;
 }
 
 .ssn-input::placeholder {
-  color: #a19f9d;
-  font-family: "Segoe UI", sans-serif;
-  letter-spacing: 0;
+  color: #aaa;
 }
 
-.ssn-status,
-.ssn-eye-btn {
-  width: 42px;
-  height: 42px;
-  flex-shrink: 0;
+.ssn-status {
+  width: 24px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  border-left: 1px solid #edebe9;
-  background: #f8f9fb;
-}
-
-.ssn-eye-btn {
-  cursor: pointer;
-  color: #605e5c;
-  border-top: none;
-  border-right: none;
-  border-bottom: none;
-  padding: 0;
-}
-
-.ssn-eye-btn:hover {
-  background: #f3f4f6;
-  color: #201f1e;
-}
-
-.ssn-hint {
-  margin-top: 6px;
-  min-height: 16px;
-  font-size: 12px;
-  color: #605e5c;
-}
-
-.ssn-hint--error {
-  color: #dc2626;
-}
-
-.ssn-hint--success {
-  color: #16a34a;
-}
-
-@keyframes ssn-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  align-items: center;
+  margin-left: 8px;
+  font-size: 14px;
 }
 
 .ssn-spinner {
-  animation: ssn-spin 1s linear infinite;
-  transform-origin: 8px 8px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ddd;
+  border-top: 2px solid #666;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.ssn-error-text {
+  font-size: 12px;
+  color: #d93025;
+  margin-top: 4px;
 }
