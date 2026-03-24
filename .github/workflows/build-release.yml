@@ -14,12 +14,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Set Node legacy OpenSSL option
-        shell: pwsh
-        run: |
-          echo "NODE_OPTIONS=--openssl-legacy-provider" >> $env:GITHUB_ENV
+          node-version: '16'
 
       - name: Ensure LOCALAPPDATA exists
         shell: pwsh
