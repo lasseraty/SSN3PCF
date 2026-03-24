@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-    <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\</OutputPath>
+    <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +12,7 @@
 
   <Target Name="NormalizePcfOutput" AfterTargets="PcfBuild">
     <PropertyGroup>
-      <PcfOutDir>$(OutputPath)$(TargetFramework)\</PcfOutDir>
+      <PcfOutDir>$(OutputPath)</PcfOutDir>
       <PcfControlDir>$(PcfOutDir)FinnishSSNControl\</PcfControlDir>
     </PropertyGroup>
 
