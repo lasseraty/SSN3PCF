@@ -16,11 +16,6 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v2
-      - name: Install .NET Framework 4.6.2 targeting pack
-        shell: pwsh
-        run: choco install netfx-4.6.2-devpack --yes --no-progress --ignore-checksums
       - name: Install Power Platform CLI
         shell: pwsh
         run: |
@@ -30,38 +25,15 @@ jobs:
         run: npm install
       - name: Build PCF control
         run: npm run build
-      - name: Restructure output for solution packager
+      - name: Build solution zip with pac
         shell: pwsh
         run: |
-          $src = "out\controls\FinnishSSNControl"
-          $dst = "out\controls\net462\FinnishSSNControl"
-          New-Item -ItemType Directory -Force -Path $dst
-          Copy-Item "$src\*" $dst -Recurse -Force
-          Copy-Item "out\controls\bundle.js" $dst -Force
-          Copy-Item "out\controls\ControlManifest.xml" $dst -Force
-          Write-Host "Final output:"
-          Get-ChildItem -Path $dst -Recurse | Select-Object FullName
-      - name: Init solution
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path SolutionBuild
-          Set-Location SolutionBuild
-          pac solution init --publisher-name Bofor --publisher-prefix bfr
-          pac solution add-reference --path ../
-      - name: Build managed solution
-        shell: pwsh
-        run: |
-          Set-Location SolutionBuild
-          $proj = Get-ChildItem -Filter "*.cdsproj" | Select-Object -First 1
-          msbuild $proj.FullName /t:build /restore /p:configuration=Release /p:SolutionPackageType=Managed
-      - name: Find and rename zip
-        shell: pwsh
-        id: find_zip
-        run: |
-          $zip = Get-ChildItem -Path SolutionBuild -Recurse -Filter "*.zip" | Select-Object -First 1
-          Write-Host "Found: $($zip.FullName) — $($zip.Length) bytes"
-          Copy-Item $zip.FullName "BoforSSN_managed.zip"
-          echo "ZIP_PATH=BoforSSN_managed.zip" >> $env:GITHUB_OUTPUT
+          $controlDir = "out\controls\FinnishSSNControl"
+          Write-Host "Control dir contents:"
+          Get-ChildItem -Path "out\controls" -Recurse | Select-Object FullName
+          pac solution init --publisher-name Bofor --publisher-prefix bfr --outputDirectory SolutionBuild
+          pac solution add-reference --path . --outputDirectory SolutionBuild
+          pac solution pack --zipFile BoforSSN_managed.zip --folder SolutionBuild --packageType Managed
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
