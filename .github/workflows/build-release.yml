@@ -30,13 +30,19 @@ jobs:
         run: npm install
       - name: Build PCF control
         run: npm run build
-      - name: Copy ControlManifest to output
+      - name: Copy manifest and sources to output
         shell: pwsh
         run: |
           $outDir = "out\controls\net462\FinnishSSNControl"
           New-Item -ItemType Directory -Force -Path $outDir
           Copy-Item "ControlManifest.Input.xml" "$outDir\ControlManifest.xml"
-          Write-Host "Copied manifest to $outDir"
+          Copy-Item "index.ts" "$outDir\index.ts"
+          New-Item -ItemType Directory -Force -Path "$outDir\css"
+          Copy-Item "FinnishSSNControl\css\FinnishSSNControl.css" "$outDir\css\FinnishSSNControl.css"
+          New-Item -ItemType Directory -Force -Path "$outDir\strings"
+          Copy-Item "FinnishSSNControl\strings\FinnishSSNControl.1033.resx" "$outDir\strings\FinnishSSNControl.1033.resx"
+          Write-Host "Output dir contents:"
+          Get-ChildItem -Path $outDir -Recurse | Select-Object FullName
       - name: Init solution
         shell: pwsh
         run: |
