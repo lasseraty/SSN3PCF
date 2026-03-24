@@ -1,15 +1,131 @@
-.ssn-field-row { display:flex; align-items:center; background:#fff; border:1px solid #c8c6c4; border-radius:4px; overflow:hidden; height:42px; box-sizing:border-box; width:100%; transition:border-color 0.15s; }
-.ssn-field-row.ssn-error { border-color:#DC2626; }
-.ssn-field-row.ssn-success { border-color:#16A34A; }
-.ssn-icon-wrap { width:52px; height:42px; display:flex; align-items:center; justify-content:center; border-right:1px solid #e1dfdd; flex-shrink:0; background:#faf9f8; }
-.ssn-input { flex:1; border:none; background:transparent; padding:0 12px; font-size:14px; color:#201f1e; outline:none; font-family:'Courier New',monospace; letter-spacing:0.06em; height:100%; box-sizing:border-box; }
-.ssn-input::placeholder { font-family:'Segoe UI',sans-serif; letter-spacing:0; color:#a19f9d; }
-.ssn-status { width:42px; height:42px; display:flex; align-items:center; justify-content:center; flex-shrink:0; border-left:1px solid #e1dfdd; }
-.ssn-locked-value { flex:1; padding:0 12px; font-size:14px; color:#201f1e; font-family:'Courier New',monospace; letter-spacing:0.06em; display:flex; align-items:center; background:#faf9f8; height:100%; user-select:none; }
-.ssn-eye-btn { width:52px; height:42px; display:flex; align-items:center; justify-content:center; flex-shrink:0; border-left:1px solid #e1dfdd; border-top:none; border-right:none; border-bottom:none; background:#faf9f8; cursor:pointer; color:#605e5c; transition:color 0.15s,background 0.15s; padding:0; }
-.ssn-eye-btn:hover { color:#201f1e; background:#f3f2f1; }
-.ssn-hint { font-size:12px; color:#a19f9d; margin-top:4px; min-height:16px; font-family:'Segoe UI',sans-serif; }
-.ssn-hint--error { color:#DC2626; }
-.ssn-hint--success { color:#16A34A; }
-@keyframes ssn-spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
-.ssn-spinner { animation:ssn-spin 1s linear infinite; transform-origin:8px 8px; }
+.ssn-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 0 0 0;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.ssn-card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.ssn-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #323130;
+  letter-spacing: 0.02em;
+}
+
+.ssn-flag {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ssn-field-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 42px;
+  background: #ffffff;
+  border: 1px solid #d2d0ce;
+  border-radius: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ssn-field-row:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+.ssn-field-row.ssn-error {
+  border-color: #dc2626;
+}
+
+.ssn-field-row.ssn-success {
+  border-color: #16a34a;
+}
+
+.ssn-input,
+.ssn-locked-value {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #201f1e;
+  background: #fff;
+  box-sizing: border-box;
+  font-family: "Consolas", "Courier New", monospace;
+  letter-spacing: 0.06em;
+}
+
+.ssn-input {
+  border: none;
+  outline: none;
+}
+
+.ssn-input::placeholder {
+  color: #a19f9d;
+  font-family: "Segoe UI", sans-serif;
+  letter-spacing: 0;
+}
+
+.ssn-status,
+.ssn-eye-btn {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid #edebe9;
+  background: #f8f9fb;
+}
+
+.ssn-eye-btn {
+  cursor: pointer;
+  color: #605e5c;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  padding: 0;
+}
+
+.ssn-eye-btn:hover {
+  background: #f3f4f6;
+  color: #201f1e;
+}
+
+.ssn-hint {
+  margin-top: 6px;
+  min-height: 16px;
+  font-size: 12px;
+  color: #605e5c;
+}
+
+.ssn-hint--error {
+  color: #dc2626;
+}
+
+.ssn-hint--success {
+  color: #16a34a;
+}
+
+@keyframes ssn-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ssn-spinner {
+  animation: ssn-spin 1s linear infinite;
+  transform-origin: 8px 8px;
+}
