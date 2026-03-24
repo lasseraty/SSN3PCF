@@ -38,6 +38,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path "$outDir\css"
           New-Item -ItemType Directory -Force -Path "$outDir\strings"
           Copy-Item "ControlManifest.Input.xml" "$outDir\ControlManifest.xml"
+          Copy-Item "out\controls\net462\bundle.js" "$outDir\bundle.js"
           Copy-Item "FinnishSSNControl\css\FinnishSSNControl.css" "$outDir\css\FinnishSSNControl.css"
           Copy-Item "FinnishSSNControl\strings\FinnishSSNControl.1033.resx" "$outDir\strings\FinnishSSNControl.1033.resx"
           Write-Host "Output dir contents:"
