@@ -2,18 +2,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
-    <ProjectGuid>a1b2c3d4-e5f6-7890-abcd-ef1234567890</ProjectGuid>
-    <OutputPath>$(MSBuildThisFileDirectory)out\controls</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.PowerApps.MSBuild.Pcf" Version="1.*"/>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include=".\**">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <PackageReference Include="Microsoft.PowerApps.MSBuild.Pcf" Version="1.*" />
   </ItemGroup>
 </Project>

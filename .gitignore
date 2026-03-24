@@ -7,3 +7,12 @@ generated/
 *.user
 .DS_Store
 SolutionBuild/
+
+node_modules/
+out/
+bin/
+obj/
+SolutionBuild/bin/
+SolutionBuild/obj/
+dist/
+.generated/
