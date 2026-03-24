@@ -30,20 +30,17 @@ jobs:
         run: npm install
       - name: Build PCF control
         run: npm run build
-      - name: Show build output
-        shell: pwsh
-        run: Get-ChildItem -Path "out" -Recurse | Select-Object FullName
-      - name: Copy manifest and resources to output
+      - name: Restructure output for solution packager
         shell: pwsh
         run: |
-          $outDir = "out\controls\net462\FinnishSSNControl"
-          New-Item -ItemType Directory -Force -Path "$outDir\css"
-          New-Item -ItemType Directory -Force -Path "$outDir\strings"
-          Copy-Item "ControlManifest.Input.xml" "$outDir\ControlManifest.xml"
-          Copy-Item "FinnishSSNControl\css\FinnishSSNControl.css" "$outDir\css\FinnishSSNControl.css"
-          Copy-Item "FinnishSSNControl\strings\FinnishSSNControl.1033.resx" "$outDir\strings\FinnishSSNControl.1033.resx"
-          Write-Host "Final output dir:"
-          Get-ChildItem -Path $outDir -Recurse | Select-Object FullName
+          $src = "out\controls\FinnishSSNControl"
+          $dst = "out\controls\net462\FinnishSSNControl"
+          New-Item -ItemType Directory -Force -Path $dst
+          Copy-Item "$src\*" $dst -Recurse -Force
+          Copy-Item "out\controls\bundle.js" $dst -Force
+          Copy-Item "out\controls\ControlManifest.xml" $dst -Force
+          Write-Host "Final output:"
+          Get-ChildItem -Path $dst -Recurse | Select-Object FullName
       - name: Init solution
         shell: pwsh
         run: |
