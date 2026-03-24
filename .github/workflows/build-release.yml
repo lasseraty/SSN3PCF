@@ -16,6 +16,11 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+      - name: Install .NET Framework 4.6.2 targeting pack
+        shell: pwsh
+        run: choco install netfx-4.6.2-devpack --yes --no-progress --ignore-checksums
       - name: Install Power Platform CLI
         shell: pwsh
         run: |
@@ -25,15 +30,41 @@ jobs:
         run: npm install
       - name: Build PCF control
         run: npm run build
-      - name: Build solution zip with pac
+      - name: Init solution
         shell: pwsh
         run: |
-          $controlDir = "out\controls\FinnishSSNControl"
-          Write-Host "Control dir contents:"
-          Get-ChildItem -Path "out\controls" -Recurse | Select-Object FullName
-          pac solution init --publisher-name Bofor --publisher-prefix bfr --outputDirectory SolutionBuild
-          pac solution add-reference --path . --outputDirectory SolutionBuild
-          pac solution pack --zipFile BoforSSN_managed.zip --folder SolutionBuild --packageType Managed
+          New-Item -ItemType Directory -Force -Path SolutionBuild
+          Set-Location SolutionBuild
+          pac solution init --publisher-name Bofor --publisher-prefix bfr
+          pac solution add-reference --path ../
+      - name: Build managed solution
+        shell: pwsh
+        run: |
+          Set-Location SolutionBuild
+          $proj = Get-ChildItem -Filter "*.cdsproj" | Select-Object -First 1
+          msbuild $proj.FullName /t:build /restore /p:configuration=Release /p:SolutionPackageType=Managed
+      - name: Inject bundle.js and repack
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem -Path SolutionBuild -Recurse -Filter "*.zip" | Select-Object -First 1
+          Write-Host "Original zip size: $($zip.Length) bytes"
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zipPath = $zip.FullName
+          $archive = [System.IO.Compression.ZipFile]::Open($zipPath, 'Update')
+          $bundleContent = [System.IO.File]::ReadAllBytes("out\controls\bundle.js")
+          $entryName = "Controls/bfr_BoforPCF.FinnishSSNControl/bundle.js"
+          $existing = $archive.GetEntry($entryName)
+          if ($existing) { $existing.Delete() }
+          $entry = $archive.CreateEntry($entryName)
+          $stream = $entry.Open()
+          $stream.Write($bundleContent, 0, $bundleContent.Length)
+          $stream.Close()
+          $archive.Dispose()
+          $newSize = (Get-Item $zipPath).Length
+          Write-Host "New zip size: $newSize bytes"
+          Copy-Item $zipPath "BoforSSN_managed.zip"
+          echo "ZIP_PATH=BoforSSN_managed.zip" >> $env:GITHUB_OUTPUT
+        id: find_zip
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
