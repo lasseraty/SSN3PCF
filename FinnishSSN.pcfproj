@@ -3,10 +3,48 @@
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-    <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)\</OutputPath>
+    <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerApps.MSBuild.Pcf" Version="1.*" />
   </ItemGroup>
+
+  <Target Name="NormalizePcfOutput" AfterTargets="PcfBuild">
+    <PropertyGroup>
+      <PcfOutDir>$(OutputPath)$(TargetFramework)\</PcfOutDir>
+      <PcfControlDir>$(PcfOutDir)FinnishSSNControl\</PcfControlDir>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(PcfControlDir)" />
+
+    <Move
+      SourceFiles="$(PcfOutDir)ControlManifest.xml"
+      DestinationFiles="$(PcfControlDir)ControlManifest.xml"
+      Condition="Exists('$(PcfOutDir)ControlManifest.xml')" />
+
+    <Move
+      SourceFiles="$(PcfOutDir)bundle.js"
+      DestinationFiles="$(PcfControlDir)bundle.js"
+      Condition="Exists('$(PcfOutDir)bundle.js')" />
+
+    <ItemGroup>
+      <PcfCssFiles Include="$(PcfOutDir)css\**\*" />
+      <PcfStringFiles Include="$(PcfOutDir)strings\**\*" />
+    </ItemGroup>
+
+    <MakeDir Directories="$(PcfControlDir)css;$(PcfControlDir)strings" />
+
+    <Move
+      SourceFiles="@(PcfCssFiles)"
+      DestinationFiles="@(PcfCssFiles->'$(PcfControlDir)css\%(RecursiveDir)%(Filename)%(Extension)')"
+      Condition="'@(PcfCssFiles)' != ''" />
+
+    <Move
+      SourceFiles="@(PcfStringFiles)"
+      DestinationFiles="@(PcfStringFiles->'$(PcfControlDir)strings\%(RecursiveDir)%(Filename)%(Extension)')"
+      Condition="'@(PcfStringFiles)' != ''" />
+
+    <RemoveDir Directories="$(PcfOutDir)css;$(PcfOutDir)strings" />
+  </Target>
 </Project>
