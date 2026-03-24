@@ -14,7 +14,21 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
+
+      - name: Set Node legacy OpenSSL option
+        shell: pwsh
+        run: |
+          echo "NODE_OPTIONS=--openssl-legacy-provider" >> $env:GITHUB_ENV
+
+      - name: Ensure LOCALAPPDATA exists
+        shell: pwsh
+        run: |
+          if (-not $env:LOCALAPPDATA) {
+            $localAppDataPath = Join-Path $env:USERPROFILE "AppData\Local"
+            New-Item -ItemType Directory -Force -Path $localAppDataPath | Out-Null
+            echo "LOCALAPPDATA=$localAppDataPath" >> $env:GITHUB_ENV
+          }
 
       - uses: actions/setup-dotnet@v4
         with:
