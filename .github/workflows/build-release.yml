@@ -1,21 +1,17 @@
+cat > .github/workflows/build-release.yml << 'ENDOFFILE'
 name: Build and Release Managed Solution
-
 on:
   push:
     branches: [main]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '16'
-
       - name: Ensure LOCALAPPDATA exists
         shell: pwsh
         run: |
@@ -24,27 +20,21 @@ jobs:
             New-Item -ItemType Directory -Force -Path $localAppDataPath | Out-Null
             echo "LOCALAPPDATA=$localAppDataPath" >> $env:GITHUB_ENV
           }
-
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
-
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
-
       - name: Install .NET Framework 4.6.2 targeting pack
         shell: pwsh
         run: choco install netfx-4.6.2-devpack --yes --no-progress --ignore-checksums
-
       - name: Install Power Platform CLI
         shell: pwsh
         run: |
           dotnet tool install --global Microsoft.PowerApps.CLI.Tool
           echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
       - name: Install npm dependencies
         run: npm install
-
       - name: Init solution
         shell: pwsh
         run: |
@@ -53,23 +43,23 @@ jobs:
           Set-Location SolutionBuild
           pac solution init --publisher-name Bofor --publisher-prefix bfr
           pac solution add-reference --path ..
-
       - name: Bump solution version
         shell: pwsh
         run: |
           $version = "1.0.0.${{ github.run_number }}"
-          $xml = [xml](Get-Content SolutionBuild/Other/Solution.xml)
+          $solxml = Get-ChildItem -Path SolutionBuild -Recurse -Filter "Solution.xml" | Select-Object -First 1
+          if (-not $solxml) { Write-Error "Solution.xml not found"; exit 1 }
+          Write-Host "Found: $($solxml.FullName)"
+          $xml = [xml](Get-Content $solxml.FullName)
           $xml.ImportExportXml.SolutionManifest.Version = $version
-          $xml.Save("SolutionBuild/Other/Solution.xml")
+          $xml.Save($solxml.FullName)
           Write-Host "Version set to $version"
-
       - name: Build managed solution
         shell: pwsh
         run: |
           Set-Location SolutionBuild
           $proj = Get-ChildItem -Filter "*.cdsproj" | Select-Object -First 1
           msbuild $proj.FullName /restore /p:Configuration=Release /p:SolutionPackageType=Managed
-
       - name: Find managed zip
         id: find_zip
         shell: pwsh
@@ -77,22 +67,23 @@ jobs:
           $zip = Get-ChildItem -Path SolutionBuild\bin\Release -Recurse -Filter "*.zip" |
             Where-Object { $_.Name -match "_managed\.zip$|Managed\.zip$|\.zip$" } |
             Select-Object -First 1
-
           if (-not $zip) {
             Write-Error "Managed solution zip not found"
             exit 1
           }
-
           Copy-Item $zip.FullName BoforSSN_managed.zip -Force
           echo "ZIP_PATH=BoforSSN_managed.zip" >> $env:GITHUB_OUTPUT
           Write-Host "Managed zip: $($zip.FullName)"
           Write-Host "Size: $((Get-Item BoforSSN_managed.zip).Length) bytes"
-
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Bofor SSN PCF v1.0.${{ github.run_number }}
+          tag_name: v1.0.0.${{ github.run_number }}
+          name: Bofor SSN PCF v1.0.0.${{ github.run_number }}
           files: BoforSSN_managed.zip
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ENDOFFILE
+git add .github/workflows/build-release.yml
+git commit -m "Fix: find Solution.xml dynamically for version bump"
+git push
