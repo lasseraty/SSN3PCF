@@ -1,75 +1,94 @@
+.ssn-root {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
 .ssn-container {
   display: flex;
   align-items: center;
-  height: 44px;
-  border: 1px solid #d0d7de;
+  width: 100%;
+  min-height: 44px;
+  background: #ffffff;
+  border: 1px solid #d2d0ce;
   border-radius: 12px;
-  padding: 0 12px;
-  background: #fff;
-  transition: all 0.15s ease;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .ssn-container:focus-within {
-  border-color: #0a66c2;
-  box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.16);
 }
 
 .ssn-left {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-right: 10px;
+  padding: 0 12px 0 10px;
+  flex-shrink: 0;
+  border-right: 1px solid #edebe9;
+  min-height: 44px;
 }
 
 .ssn-flag {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #f3f2f1;
+  border: 1px solid #d2d0ce;
+  color: #0f3d91;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .ssn-label {
   font-size: 13px;
-  color: #555;
-  font-weight: 500;
+  font-weight: 600;
+  color: #323130;
+  letter-spacing: 0.01em;
 }
 
 .ssn-input {
   flex: 1;
+  min-width: 0;
+  height: 44px;
   border: none;
   outline: none;
-  font-size: 14px;
-  font-family: "Segoe UI", monospace;
   background: transparent;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #201f1e;
+  font-family: "Consolas", "Courier New", monospace;
+  letter-spacing: 0.04em;
+  box-sizing: border-box;
 }
 
 .ssn-input::placeholder {
-  color: #aaa;
+  color: #a19f9d;
+  letter-spacing: 0;
+  font-family: "Segoe UI", sans-serif;
 }
 
 .ssn-status {
-  width: 24px;
+  width: 42px;
+  min-height: 44px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-left: 8px;
-  font-size: 14px;
-}
-
-.ssn-spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid #ddd;
-  border-top: 2px solid #666;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+  justify-content: center;
+  flex-shrink: 0;
+  border-left: 1px solid #edebe9;
+  background: #faf9f8;
 }
 
 .ssn-error-text {
-  font-size: 12px;
-  color: #d93025;
+  min-height: 16px;
   margin-top: 4px;
+  font-size: 12px;
+  color: #d13438;
 }
