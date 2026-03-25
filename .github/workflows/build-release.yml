@@ -82,7 +82,3 @@ jobs:
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-ENDOFFILE
-git add .github/workflows/build-release.yml
-git commit -m "Fix: find Solution.xml dynamically for version bump"
-git push
