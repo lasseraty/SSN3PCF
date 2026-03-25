@@ -11,6 +11,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '16'
+          cache: 'npm'
       - name: Ensure LOCALAPPDATA exists
         shell: pwsh
         run: |
@@ -33,7 +34,7 @@ jobs:
           dotnet tool install --global Microsoft.PowerApps.CLI.Tool
           echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Install npm dependencies
-        run: npm install
+        run: npm ci --prefer-offline --ignore-scripts
       - name: Init solution
         shell: pwsh
         run: |
