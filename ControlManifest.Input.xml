@@ -2,7 +2,7 @@
 <manifest>
   <control namespace="BoforPCF"
            constructor="FinnishSSNControl"
-           version="1.0.2"
+           version="1.0.3"
            display-name-key="FinnishSSNControl_Display_Key"
            description-key="FinnishSSNControl_Desc_Key"
            control-type="standard">

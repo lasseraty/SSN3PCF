@@ -92,3 +92,21 @@
   font-size: 12px;
   color: #d13438;
 }
+
+.ssn-container.ssn-valid {
+  border-color: #16a34a;
+}
+
+.ssn-container.ssn-invalid {
+  border-color: #dc2626;
+}
+
+.ssn-spinner {
+  animation: ssn-spin 1s linear infinite;
+  transform-origin: 8px 8px;
+}
+
+@keyframes ssn-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
