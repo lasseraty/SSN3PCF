@@ -1,4 +1,3 @@
-cat > .github/workflows/build-release.yml << 'ENDOFFILE'
 name: Build and Release Managed Solution
 on:
   push:
