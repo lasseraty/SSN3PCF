@@ -3,8 +3,8 @@ type StatusState = "empty" | "valid" | "invalid" | "duplicate";
 export class FinnishSSNControl implements ComponentFramework.StandardControl<IInputs, IOutputs> {
   private _value: string = "";
   private _initialValue: string = "";
-  private _debounceTimer: ReturnType<typeof setTimeout> | null = null;
-  private _revealTimer: ReturnType<typeof setTimeout> | null = null;
+  private _debounceTimer: number | null = null;
+  private _revealTimer: number | null = null;
   private _requestId: number = 0;
   private _statusState: StatusState = "empty";
   private _isRevealed: boolean = false;
