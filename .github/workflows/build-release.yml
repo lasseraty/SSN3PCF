@@ -54,6 +54,15 @@ jobs:
           pac solution init --publisher-name Bofor --publisher-prefix bfr
           pac solution add-reference --path ..
 
+      - name: Bump solution version
+        shell: pwsh
+        run: |
+          $version = "1.0.0.${{ github.run_number }}"
+          $xml = [xml](Get-Content SolutionBuild/Other/Solution.xml)
+          $xml.ImportExportXml.SolutionManifest.Version = $version
+          $xml.Save("SolutionBuild/Other/Solution.xml")
+          Write-Host "Version set to $version"
+
       - name: Build managed solution
         shell: pwsh
         run: |
