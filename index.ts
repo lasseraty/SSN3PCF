@@ -9,14 +9,18 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     private _input!: HTMLInputElement;
     private _status!: HTMLDivElement;
     private _error!: HTMLDivElement;
+    private _eyeButton!: HTMLButtonElement;
 
     private _context!: ComponentFramework.Context<IInputs>;
     private _notifyOutputChanged!: () => void;
 
     private _value: string = "";
+    private _initialValue: string = "";
     private _debounceTimer: number | null = null;
+    private _revealTimer: number | null = null;
     private _requestId = 0;
     private _statusState: StatusState = "empty";
+    private _isRevealed = false;
 
     private readonly SSN_REGEX = /^(\d{2})(\d{2})(\d{2})([-+A])(\d{3})([0-9A-FHJKLMNPRSTUVWXY])$/i;
     private readonly CHECKSUM_CHARS = "0123456789ABCDEFHJKLMNPRSTUVWXY";
@@ -31,6 +35,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
         this._notifyOutputChanged = notifyOutputChanged;
         this._container = container;
         this._value = context.parameters.ssnValue.raw || "";
+        this._initialValue = this._value;
 
         this._root = document.createElement("div");
         this._root.className = "ssn-root";
@@ -57,13 +62,21 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
         this._input.type = "text";
         this._input.placeholder = "DDMMYY-123A";
         this._input.maxLength = 11;
-        this._input.value = this._value;
         this._input.setAttribute("autocomplete", "off");
         this._input.setAttribute("spellcheck", "false");
 
-        if (this._context.mode.isControlDisabled) {
-            this._input.disabled = true;
-        }
+        this._eyeButton = document.createElement("button");
+        this._eyeButton.type = "button";
+        this._eyeButton.className = "ssn-eye";
+        this._eyeButton.setAttribute("aria-label", "Show SSN for 10 seconds");
+        this._eyeButton.title = "Show SSN for 10 seconds";
+        this._eyeButton.style.border = "none";
+        this._eyeButton.style.background = "transparent";
+        this._eyeButton.style.cursor = "pointer";
+        this._eyeButton.style.padding = "0 4px";
+        this._eyeButton.style.display = "none";
+        this._eyeButton.innerHTML = this._svgEye();
+        this._eyeButton.addEventListener("click", this._onRevealClick.bind(this));
 
         this._input.addEventListener("input", this._onInput.bind(this));
         this._input.addEventListener("blur", this._onBlur.bind(this));
@@ -77,6 +90,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
 
         this._field.appendChild(left);
         this._field.appendChild(this._input);
+        this._field.appendChild(this._eyeButton);
         this._field.appendChild(this._status);
 
         this._root.appendChild(this._field);
@@ -85,8 +99,15 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
         this._container.innerHTML = "";
         this._container.appendChild(this._root);
 
+        this._applyMode();
+
         if (this._value) {
-            this._runValidationFlow(this._value);
+            if (this._isImmutable()) {
+                this._setStatus("valid");
+                this._setError("");
+            } else {
+                this._runValidationFlow(this._value);
+            }
         } else {
             this._setStatus("empty");
         }
@@ -95,24 +116,29 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     public updateView(context: ComponentFramework.Context<IInputs>): void {
         this._context = context;
         const newValue = context.parameters.ssnValue.raw || "";
+        const previousImmutable = this._isImmutable();
+        this._initialValue = newValue;
 
         if (newValue !== this._value) {
             this._value = newValue;
-            if (this._input) {
-                this._input.value = newValue;
-            }
 
             if (newValue) {
-                this._runValidationFlow(newValue);
+                if (this._isImmutable()) {
+                    this._setStatus("valid");
+                    this._setError("");
+                } else {
+                    this._runValidationFlow(newValue);
+                }
             } else {
                 this._setStatus("empty");
                 this._setError("");
             }
+        } else if (!previousImmutable && this._isImmutable()) {
+            this._setStatus("valid");
+            this._setError("");
         }
 
-        if (this._input) {
-            this._input.disabled = this._context.mode.isControlDisabled;
-        }
+        this._applyMode();
     }
 
     public getOutputs(): IOutputs {
@@ -126,14 +152,24 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
             clearTimeout(this._debounceTimer);
             this._debounceTimer = null;
         }
+
+        if (this._revealTimer) {
+            clearTimeout(this._revealTimer);
+            this._revealTimer = null;
+        }
     }
 
     private _onInput(): void {
+        if (this._isImmutable()) {
+            this._applyMode();
+            return;
+        }
+
         const raw = this._input.value;
         const formatted = this._normalizeInput(raw);
 
         if (formatted !== raw) {
-            const pos = this._input.selectionStart || formatted.length;
+            const pos = Math.min(this._input.selectionStart || formatted.length, formatted.length);
             this._input.value = formatted;
             this._input.setSelectionRange(pos, pos);
         }
@@ -152,8 +188,25 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     }
 
     private _onBlur(): void {
-        if (!this._value) return;
+        if (!this._value || this._isImmutable()) return;
         this._runValidationFlow(this._value, true);
+    }
+
+    private _onRevealClick(): void {
+        if (!this._isImmutable() || !this._value) return;
+
+        this._isRevealed = true;
+        this._applyMode();
+
+        if (this._revealTimer) {
+            clearTimeout(this._revealTimer);
+        }
+
+        this._revealTimer = window.setTimeout(() => {
+            this._isRevealed = false;
+            this._applyMode();
+            this._revealTimer = null;
+        }, 10000);
     }
 
     private _runValidationFlow(value: string, immediate: boolean = false): void {
@@ -289,6 +342,32 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
             });
     }
 
+    private _isImmutable(): boolean {
+        return !!this._initialValue;
+    }
+
+    private _applyMode(): void {
+        const immutable = this._isImmutable();
+        const disabled = this._context.mode.isControlDisabled || immutable;
+
+        this._input.disabled = disabled;
+
+        if (immutable) {
+            this._input.value = this._isRevealed ? this._value : this._maskSSN(this._value);
+            this._eyeButton.style.display = this._value ? "inline-flex" : "none";
+            this._input.style.paddingRight = "4px";
+        } else {
+            this._input.value = this._value;
+            this._eyeButton.style.display = "none";
+            this._input.style.paddingRight = "";
+        }
+    }
+
+    private _maskSSN(value: string): string {
+        if (!value || value.length < 11) return value;
+        return value.slice(0, 7) + "xxxx";
+    }
+
     private _setStatus(state: StatusState): void {
         this._statusState = state;
         this._field.className = "ssn-container";
@@ -343,6 +422,13 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
           <circle cx="8" cy="8" r="7" fill="#FEE2E2" stroke="#FCA5A5" stroke-width="1"/>
           <line x1="5.5" y1="5.5" x2="10.5" y2="10.5" stroke="#DC2626" stroke-width="1.5" stroke-linecap="round"/>
           <line x1="10.5" y1="5.5" x2="5.5" y2="10.5" stroke="#DC2626" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>`;
+    }
+
+    private _svgEye(): string {
+        return `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M1.5 8C2.7 5.6 5.1 4 8 4s5.3 1.6 6.5 4c-1.2 2.4-3.6 4-6.5 4S2.7 10.4 1.5 8Z" stroke="#605E5C" stroke-width="1.2" />
+          <circle cx="8" cy="8" r="2.2" stroke="#605E5C" stroke-width="1.2" />
         </svg>`;
     }
 }
