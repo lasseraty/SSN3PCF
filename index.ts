@@ -211,7 +211,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
         this._setError("");
 
         const doCheck = () => {
-            this._checkDuplicate(value, requestId);
+            this._setStatus("valid"); this._setError("");
         };
 
         if (immediate) {
