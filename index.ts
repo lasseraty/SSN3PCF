@@ -102,12 +102,8 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
         this._applyMode();
 
         if (this._value) {
-            if (this._isImmutable()) {
-                this._setStatus("valid");
-                this._setError("");
-            } else {
-                this._runValidationFlow(this._value);
-            }
+            this._setStatus("valid");
+            this._setError("");
         } else {
             this._setStatus("empty");
         }
@@ -116,25 +112,17 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     public updateView(context: ComponentFramework.Context<IInputs>): void {
         this._context = context;
         const newValue = context.parameters.ssnValue.raw || "";
-        const previousImmutable = this._isImmutable();
 
         if (newValue !== this._value) {
             this._value = newValue;
 
-            if (newValue) {
-                if (this._isImmutable()) {
-                    this._setStatus("valid");
-                    this._setError("");
-                } else {
-                    this._runValidationFlow(newValue);
-                }
-            } else {
+            if (!newValue) {
+                this._requestId++;
                 this._setStatus("empty");
                 this._setError("");
+            } else {
+                this._runValidationFlow(newValue);
             }
-        } else if (!previousImmutable && this._isImmutable()) {
-            this._setStatus("valid");
-            this._setError("");
         }
 
         this._applyMode();
@@ -159,11 +147,6 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     }
 
     private _onInput(): void {
-        if (this._isImmutable()) {
-            this._applyMode();
-            return;
-        }
-
         const raw = this._input.value;
         const formatted = this._normalizeInput(raw);
 
@@ -187,12 +170,12 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     }
 
     private _onBlur(): void {
-        if (!this._value || this._isImmutable()) return;
+        if (!this._value) return;
         this._runValidationFlow(this._value, true);
     }
 
     private _onRevealClick(): void {
-        if (!this._isImmutable() || !this._value) return;
+        if (!this._value) return;
 
         this._isRevealed = true;
         this._applyMode();
@@ -283,62 +266,78 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     }
 
     private _checkDuplicate(value: string, requestId: number): void {
-        const entityName =
-            (this._context as any).page?.entityTypeName ||
-            (this._context as any).page?.getEntityName?.() ||
-            "";
-
-        let attributeName = "";
         try {
-            attributeName =
-                (this._context.parameters.ssnValue as any)?.attributes?.LogicalName ||
-                (this._context.parameters.ssnValue as any)?._property?.name ||
+            const entityName =
+                (this._context as any).page?.entityTypeName ||
+                (this._context as any).page?.getEntityName?.() ||
                 "";
-        } catch (_) {}
 
-        if (!entityName || !attributeName) {
+            let attributeName = "";
+            try {
+                attributeName =
+                    (this._context.parameters.ssnValue as any)?.attributes?.LogicalName ||
+                    (this._context.parameters.ssnValue as any)?._property?.name ||
+                    "";
+            } catch (_) {
+                attributeName = "";
+            }
+
+            if (!entityName || !attributeName) {
+                if (requestId !== this._requestId) return;
+                this._setStatus("valid");
+                this._setError("");
+                return;
+            }
+
+            const currentIdRaw: string = (this._context as any).page?.entityId || "";
+            const currentId = currentIdRaw.replace(/[{}]/g, "");
+            const escapedValue = value.replace(/'/g, "''");
+
+            const selfFilter = currentId ? ` and ${entityName}id ne ${currentId}` : "";
+            const query = `?$select=${attributeName}&$filter=${attributeName} eq '${escapedValue}'${selfFilter}&$top=1`;
+
+            let retrievePromise: Promise<any>;
+            try {
+                retrievePromise = this._context.webAPI.retrieveMultipleRecords(entityName, query);
+            } catch (err) {
+                if (requestId !== this._requestId) return;
+                this._setStatus("valid");
+                this._setError("");
+                console.warn("SSN duplicate check threw synchronously:", err);
+                return;
+            }
+
+            const timeoutPromise = new Promise<never>((_, reject) => {
+                window.setTimeout(() => reject(new Error("Duplicate check timeout")), 4000);
+            });
+
+            Promise.race([retrievePromise, timeoutPromise])
+                .then((result: any) => {
+                    if (requestId !== this._requestId) return;
+
+                    if (result?.entities?.length > 0) {
+                        this._setStatus("duplicate");
+                        this._setError("Duplicate SSN found");
+                        return;
+                    }
+
+                    this._setStatus("valid");
+                    this._setError("");
+                })
+                .catch((err: any) => {
+                    if (requestId !== this._requestId) return;
+
+                    this._setStatus("valid");
+                    this._setError("");
+
+                    console.warn("SSN duplicate check failed:", err);
+                });
+        } catch (err) {
             if (requestId !== this._requestId) return;
             this._setStatus("valid");
             this._setError("");
-            return;
+            console.warn("SSN duplicate check outer failure:", err);
         }
-
-        const currentIdRaw: string = (this._context as any).page?.entityId || "";
-        const currentId = currentIdRaw.replace(/[{}]/g, "");
-        const escapedValue = value.replace(/'/g, "''");
-
-        const selfFilter = currentId ? ` and ${entityName}id ne ${currentId}` : "";
-        const query = `?$select=${attributeName}&$filter=${attributeName} eq '${escapedValue}'${selfFilter}&$top=1`;
-
-        const timeoutPromise = new Promise<never>((_, reject) => {
-            window.setTimeout(() => reject(new Error("Duplicate check timeout")), 4000);
-        });
-
-        Promise.race([
-            this._context.webAPI.retrieveMultipleRecords(entityName, query),
-            timeoutPromise
-        ])
-            .then((result: any) => {
-                if (requestId !== this._requestId) return;
-
-                if (result?.entities?.length > 0) {
-                    this._setStatus("duplicate");
-                    this._setError("Duplicate SSN found");
-                    return;
-                }
-
-                this._setStatus("valid");
-                this._setError("");
-            })
-            .catch((err: any) => {
-                if (requestId !== this._requestId) return;
-
-                this._setStatus("valid");
-                this._setError("");
-
-                // eslint-disable-next-line no-console
-                console.warn("SSN duplicate check failed:", err);
-            });
     }
 
     private _isImmutable(): boolean {
@@ -346,20 +345,12 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     }
 
     private _applyMode(): void {
-        const immutable = this._isImmutable();
-        const disabled = this._context.mode.isControlDisabled || immutable;
+        const disabled = this._context.mode.isControlDisabled;
 
         this._input.disabled = disabled;
-
-        if (immutable) {
-            this._input.value = this._isRevealed ? this._value : this._maskSSN(this._value);
-            this._eyeButton.style.display = this._value ? "inline-flex" : "none";
-            this._input.style.paddingRight = "4px";
-        } else {
-            this._input.value = this._value;
-            this._eyeButton.style.display = "none";
-            this._input.style.paddingRight = "";
-        }
+        this._input.value = this._value;
+        this._eyeButton.style.display = "none";
+        this._input.style.paddingRight = "";
     }
 
     private _maskSSN(value: string): string {
