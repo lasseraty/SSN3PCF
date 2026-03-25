@@ -120,6 +120,9 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
                 this._requestId++;
                 this._setStatus("empty");
                 this._setError("");
+            } else if (this._isImmutable()) {
+                this._setStatus("valid");
+                this._setError("");
             } else {
                 this._runValidationFlow(newValue);
             }
