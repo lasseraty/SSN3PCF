@@ -117,7 +117,6 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
         this._context = context;
         const newValue = context.parameters.ssnValue.raw || "";
         const previousImmutable = this._isImmutable();
-        this._initialValue = newValue;
 
         if (newValue !== this._value) {
             this._value = newValue;
@@ -343,7 +342,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     }
 
     private _isImmutable(): boolean {
-        return !!this._initialValue;
+        return false;
     }
 
     private _applyMode(): void {
