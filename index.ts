@@ -341,16 +341,24 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     }
 
     private _isImmutable(): boolean {
-        return false;
+        return !!(this._initialValue && this._initialValue.length > 0);
     }
 
     private _applyMode(): void {
         const disabled = this._context.mode.isControlDisabled;
+        const immutable = this._isImmutable();
 
-        this._input.disabled = disabled;
-        this._input.value = this._value;
-        this._eyeButton.style.display = "none";
-        this._input.style.paddingRight = "";
+        if (immutable && !this._isRevealed) {
+            this._input.disabled = true;
+            this._input.value = this._maskSSN(this._value);
+            this._input.style.paddingRight = "28px";
+            this._eyeButton.style.display = this._value ? "inline-flex" : "none";
+        } else {
+            this._input.disabled = disabled || immutable;
+            this._input.value = this._value;
+            this._input.style.paddingRight = immutable ? "28px" : "";
+            this._eyeButton.style.display = (immutable && this._value) ? "inline-flex" : "none";
+        }
     }
 
     private _maskSSN(value: string): string {
