@@ -196,7 +196,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
   private _iconSVG(): string {
     return `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="36" height="36" rx="8" fill="#f0f9ff"/>
-      <text x="18" y="15" text-anchor="middle" font-size="8" font-weight="700" fill="#0f3d91" font-family="Segoe UI,sans-serif">SSN</text>
+      <text x="18" y="15" text-anchor="middle" font-size="8" font-weight="700" fill="#0f3d91" font-family="Segoe UI,sans-serif">v28</text>
       <line x1="8" y1="19" x2="28" y2="19" stroke="#d2d0ce" stroke-width="1" stroke-dasharray="2 2"/>
       <circle cx="12" cy="24" r="2" fill="#0f3d91" opacity="0.4"/>
       <circle cx="18" cy="24" r="2" fill="#0f3d91" opacity="0.4"/>
