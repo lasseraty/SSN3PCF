@@ -217,7 +217,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     const query =
       `?$select=${attributeName}` +
       `&$filter=${attributeName} eq '${escaped}'${selfFilter}` +
-      `&statecode eq 0 or statecode eq 1` +  // active + inactive
+      `` and (statecode eq 0 or statecode eq 1)` +
       `&$top=1`;
 
     const timeout = new Promise<never>((_, reject) =>
