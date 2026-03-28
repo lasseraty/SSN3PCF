@@ -29,10 +29,8 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
   public updateView(context: ComponentFramework.Context<IInputs>): void {
     this._context = context;
     const newValue = context.parameters.ssnValue.raw || "";
-    if (newValue !== this._currentValue) {
-      this._currentValue = newValue;
-      this._render();
-    }
+    this._currentValue = newValue;
+    this._render();
   }
 
   public getOutputs(): IOutputs {
