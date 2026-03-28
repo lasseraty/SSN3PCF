@@ -1,10 +1,12 @@
 import { IInputs, IOutputs } from "./generated/ManifestTypes";
-type StatusState = "empty" | "valid" | "invalid";
+type StatusState = "empty" | "valid" | "invalid" | "duplicate";
 export class FinnishSSNControl implements ComponentFramework.StandardControl<IInputs, IOutputs> {
   private _context!: ComponentFramework.Context<IInputs>;
   private _notifyOutputChanged!: () => void;
   private _container!: HTMLDivElement;
   private _currentValue: string = "";
+  private _isNewRecord: boolean = false;
+  private _requestId: number = 0;
   private _debounceTimer: number | null = null;
   private _revealTimer: number | null = null;
   private _countdownTimer: number | null = null;
@@ -23,6 +25,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     this._notifyOutputChanged = notifyOutputChanged;
     this._container = container;
     this._currentValue = context.parameters.ssnValue.raw || "";
+    this._isNewRecord = !this._currentValue;
     this._render();
   }
 
@@ -30,6 +33,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     this._context = context;
     const newValue = context.parameters.ssnValue.raw || "";
     this._currentValue = newValue;
+    if (this._isNewRecord && newValue) this._isNewRecord = false;
     this._render();
   }
 
@@ -44,7 +48,6 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
   }
 
   private _isEditMode(): boolean {
-    console.log("SSN DEBUG isEditMode:", this._currentValue, this._context.mode.isControlDisabled);
     return !this._currentValue && !this._context.mode.isControlDisabled;
   }
 
@@ -66,7 +69,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     this._hintEl.className = "ssn-hint";
     this._container.appendChild(this._hintEl);
     this._setHint(
-      this._isEditMode() ? "Enter Finnish personal identity code (PPKKVV-TTTC)" : "Click eye to reveal for 10 seconds",
+      this._isEditMode() ? "Enter Finnish personal identity code (PPKKVV-TTTC)" : "",
       ""
     );
   }
@@ -154,6 +157,39 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
     if (this._eyeBtn) { this._eyeBtn.innerHTML = this._svgEye(); this._eyeBtn.title = "Reveal SSN for 10 seconds"; }
   }
 
+  private _checkDuplicate(value: string, reqId: number): void {
+    const entityName = (this._context.page as any)?.entityTypeName || "";
+    const attributeName = (this._context.parameters.ssnValue as any)?.attributes?.LogicalName || "";
+    if (!entityName || !attributeName) {
+      this._setStatus("valid");
+      this._setHint("", "");
+      return;
+    }
+    const currentId = ((this._context.page as any)?.entityId || "").replace(/[{}]/g, "");
+    const escaped = value.replace(/'/g, "''");
+    const selfFilter = currentId ? ` and ${entityName}id ne ${currentId}` : "";
+    const query = `?$select=${attributeName}&$filter=${attributeName} eq '${escaped}'${selfFilter}&$top=1`;
+    const timeout = new Promise<never>((_, reject) =>
+      window.setTimeout(() => reject(new Error("timeout")), 4000)
+    );
+    Promise.race([this._context.webAPI.retrieveMultipleRecords(entityName, query), timeout])
+      .then((result: any) => {
+        if (reqId !== this._requestId) return;
+        if (result?.entities?.length > 0) {
+          this._setStatus("duplicate");
+          this._setHint("Duplicate SSN found", "error");
+        } else {
+          this._setStatus("valid");
+          this._setHint("", "");
+        }
+      })
+      .catch(() => {
+        if (reqId !== this._requestId) return;
+        this._setStatus("valid");
+        this._setHint("", "");
+      });
+  }
+
   private _validateFormat(value: string): { valid: boolean; message?: string } {
     const m = value.match(this.SSN_REGEX);
     if (!m) return { valid: false, message: "Invalid format — expected DDMMYY-TTTC" };
@@ -195,7 +231,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
   private _iconSVG(): string {
     return `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="36" height="36" rx="8" fill="#f0f9ff"/>
-      <text x="18" y="15" text-anchor="middle" font-size="8" font-weight="700" fill="#0f3d91" font-family="Segoe UI,sans-serif">v28</text>
+      <text x="18" y="15" text-anchor="middle" font-size="8" font-weight="700" fill="#0f3d91" font-family="Segoe UI,sans-serif">v29</text>
       <line x1="8" y1="19" x2="28" y2="19" stroke="#d2d0ce" stroke-width="1" stroke-dasharray="2 2"/>
       <circle cx="12" cy="24" r="2" fill="#0f3d91" opacity="0.4"/>
       <circle cx="18" cy="24" r="2" fill="#0f3d91" opacity="0.4"/>
