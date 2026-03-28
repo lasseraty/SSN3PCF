@@ -158,14 +158,14 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
   }
 
   private _checkDuplicate(value: string, reqId: number): void {
-    const entityName = (this._context.page as any)?.entityTypeName || "";
+    const entityName = (this._context as any).page?.entityTypeName || "";
     const attributeName = (this._context.parameters.ssnValue as any)?.attributes?.LogicalName || "";
     if (!entityName || !attributeName) {
       this._setStatus("valid");
       this._setHint("", "");
       return;
     }
-    const currentId = ((this._context.page as any)?.entityId || "").replace(/[{}]/g, "");
+    const currentId = ((this._context as any).page?.entityId || "").replace(/[{}]/g, "");
     const escaped = value.replace(/'/g, "''");
     const selfFilter = currentId ? ` and ${entityName}id ne ${currentId}` : "";
     const query = `?$select=${attributeName}&$filter=${attributeName} eq '${escaped}'${selfFilter}&$top=1`;
