@@ -1,10 +1,4 @@
-.ssn-root {
-  width: 100%;
-  box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
-}
-
-.ssn-container {
+.ssn-field-row {
   display: flex;
   align-items: center;
   width: 100%;
@@ -14,44 +8,17 @@
   border-radius: 12px;
   box-sizing: border-box;
   overflow: hidden;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-family: "Segoe UI", sans-serif;
 }
 
-.ssn-container:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.16);
-}
-
-.ssn-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 12px 0 10px;
-  flex-shrink: 0;
-  border-right: 1px solid #edebe9;
-  min-height: 44px;
-}
-
-.ssn-flag {
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  background: #f3f2f1;
-  border: 1px solid #d2d0ce;
-  color: #0f3d91;
+.ssn-icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.ssn-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #323130;
-  letter-spacing: 0.01em;
+  padding: 0 10px;
+  flex-shrink: 0;
+  border-right: 1px solid #edebe9;
+  min-height: 44px;
 }
 
 .ssn-input {
@@ -75,6 +42,33 @@
   font-family: "Segoe UI", sans-serif;
 }
 
+.ssn-locked-value {
+  flex: 1;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #201f1e;
+  font-family: "Consolas", "Courier New", monospace;
+  letter-spacing: 0.04em;
+}
+
+.ssn-eye-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  min-height: 44px;
+  border: none;
+  border-left: 1px solid #edebe9;
+  background: #faf9f8;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.ssn-eye-btn:hover {
+  background: #f3f2f1;
+}
+
 .ssn-status {
   width: 42px;
   min-height: 44px;
@@ -86,27 +80,14 @@
   background: #faf9f8;
 }
 
-.ssn-error-text {
+.ssn-hint {
   min-height: 16px;
   margin-top: 4px;
   font-size: 12px;
+  color: #605e5c;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.ssn-hint-error {
   color: #d13438;
-}
-
-.ssn-container.ssn-valid {
-  border-color: #16a34a;
-}
-
-.ssn-container.ssn-invalid {
-  border-color: #dc2626;
-}
-
-.ssn-spinner {
-  animation: ssn-spin 1s linear infinite;
-  transform-origin: 8px 8px;
-}
-
-@keyframes ssn-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
