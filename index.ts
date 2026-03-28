@@ -46,6 +46,7 @@ export class FinnishSSNControl implements ComponentFramework.StandardControl<IIn
   }
 
   private _isEditMode(): boolean {
+    console.log("SSN DEBUG isEditMode:", this._currentValue, this._context.mode.isControlDisabled);
     return !this._currentValue && !this._context.mode.isControlDisabled;
   }
 
